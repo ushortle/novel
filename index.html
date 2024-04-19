@@ -56,57 +56,57 @@
             <fieldset class="layui-elem-field layui-field-title">
                 <legend style="font-size: 1.2rem;">结果</legend>
             </fieldset>
-            <div class
-                <div style
+            <div class="layui-form-item layui-form-text">
+                <div style="margin: 0 1rem;" id="resultContainer"></div>
             </div>
         </form>
     </div>
 
-    <script src
+    <script src="https://www.layuicdn.com/layui/layui.js" charset="utf-8"></script>
     <script>
         layui.use(['form', 'jquery', 'layer'], function () {
-            var form 
-                $ 
-                layer 
+            var form = layui.form,
+                $ = layui.$,
+                layer = layui.layer;
 
             $("#submitBtn").click(function () {
-                var aliasName 
+                var aliasName = $('#aliasNameInput').val().trim();
                 if (!aliasName) {
                     layer.msg('请输入别名');
                     return;
                 }
 
-                var loading 
-                    shade
+                var loading = layer.load('处理中', {
+                    shade: [0.1, '#fff']
                 });
 
                 $.ajax({
-                    url
-                    method
-                    success
-                        var resultContainer 
-                        if (res.length 
+                    url: 'https://novel.ushortle.com/aliasName/api.php?alias_name=' + encodeURIComponent(aliasName),
+                    method: 'GET',
+                    success: function (res) {
+                        var resultContainer = $('#resultContainer');
+                        if (res.length === 0) {
                             resultContainer.html('<p>未找到匹配的结果</p>');
                             layer.close(loading);
                             return;
                         }
                         resultContainer.empty(); // 清空之前的结果
                         res.forEach(function (result, index) {
-                            var outputHtml 
+                            var outputHtml = '<div class="output-container">';
                             for (var key in result) {
                                 if (result.hasOwnProperty(key)) {
-                                    outputHtml +
+                                    outputHtml += '<p class="output-value"><strong>' + key + ':</strong> ' + result[key] + '</p>';
                                 }
                             }
-                            outputHtml +
+                            outputHtml += '</div>';
                             resultContainer.append(outputHtml);
                         });
                         layer.close(loading);
                     },
-                    error
+                    error: function (xhr, status, error) {
                         layer.close(loading);
                         layer.msg('查询失败，请重试');
-                        console.error('Error
+                        console.error('Error:', error);
                     }
                 });
             });
